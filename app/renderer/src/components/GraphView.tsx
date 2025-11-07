@@ -11,6 +11,7 @@ interface GraphViewProps {
   repoPath: string;
   onInstallHooks: () => void;
   hooksInstalled: boolean;
+  selectedAuthor?: string;
 }
 
 const GraphView: React.FC<GraphViewProps> = ({
@@ -18,6 +19,7 @@ const GraphView: React.FC<GraphViewProps> = ({
   repoPath,
   onInstallHooks,
   hooksInstalled,
+  selectedAuthor = 'all',
 }) => {
   const { theme } = useTheme();
   const graphContainerRef = useRef<HTMLDivElement>(null);
@@ -47,23 +49,69 @@ const GraphView: React.FC<GraphViewProps> = ({
       // Add click handlers to commit dots after rendering
       setTimeout(() => {
         const commitDots = graphContainerRef.current?.querySelectorAll('circle');
+        let firstMatchingDot: HTMLElement | null = null;
+        
         commitDots?.forEach((dot, index) => {
-          dot.style.cursor = 'pointer';
-          dot.addEventListener('click', (e) => {
+          const htmlDot = dot as HTMLElement;
+          htmlDot.style.cursor = 'pointer';
+          htmlDot.addEventListener('click', (e) => {
             e.stopPropagation();
             // Find commit by index (gitgraph renders in order)
             if (commits[index]) {
               setSelectedCommit(commits[index]);
             }
           });
+          
+          // Add highlight class for matching author
+          if (commits[index]) {
+            if (selectedAuthor !== 'all' && commits[index].author === selectedAuthor) {
+              htmlDot.classList.add('highlight-commit');
+              if (!firstMatchingDot) {
+                firstMatchingDot = htmlDot;
+              }
+            } else {
+              htmlDot.classList.remove('highlight-commit');
+            }
+          }
         });
+        
+        // Zoom to first matching commit
+        if (firstMatchingDot && selectedAuthor !== 'all') {
+          // Get SVG coordinates of the commit dot
+          const cx = parseFloat(firstMatchingDot.getAttribute('cx') || '0');
+          const cy = parseFloat(firstMatchingDot.getAttribute('cy') || '0');
+          
+          // Get container dimensions
+          const container = graphContainerRef.current?.parentElement;
+          if (container) {
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+            
+            // Calculate center of viewport
+            const centerX = containerWidth / 2;
+            const centerY = containerHeight / 2;
+            
+            // Calculate offset to center the dot
+            const targetZoom = 1.8;
+            const offsetX = centerX - (cx * targetZoom);
+            const offsetY = centerY - (cy * targetZoom);
+            
+            // Apply zoom and pan with smooth transition
+            setZoom(targetZoom);
+            setPanOffset({ x: offsetX, y: offsetY });
+          }
+        } else if (selectedAuthor === 'all') {
+          // Reset zoom when no filter
+          setZoom(1);
+          setPanOffset({ x: 0, y: 0 });
+        }
       }, 100);
     }
 
     return () => {
       // Don't destroy on every render, only on unmount
     };
-  }, [commits, theme]);
+  }, [commits, theme, selectedAuthor]);
 
   useEffect(() => {
     // Cleanup on unmount

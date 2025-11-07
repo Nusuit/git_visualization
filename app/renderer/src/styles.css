@@ -123,3 +123,20 @@ code {
   background: transparent !important;
 }
 
+/* Highlight animation for filtered commits - blink only */
+@keyframes blink-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 1)) drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+    opacity: 1;
+  }
+  50% {
+    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6)) drop-shadow(0 0 8px rgba(255, 215, 0, 0.4));
+    opacity: 0.5;
+  }
+}
+
+.highlight-commit {
+  animation: blink-glow 1s ease-in-out infinite !important;
+  z-index: 100 !important;
+}
+

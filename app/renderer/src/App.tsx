@@ -19,6 +19,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [hooksInstalled, setHooksInstalled] = useState(false);
   const [isReplaying, setIsReplaying] = useState(false);
+  const [selectedAuthor, setSelectedAuthor] = useState<string>('all');
   const stopReplayRef = useRef(false);
 
   useEffect(() => {
@@ -258,6 +259,7 @@ function App() {
         onReplayClick={handleReplay}
         onStopReplay={handleStopReplay}
         isReplaying={isReplaying}
+        onAuthorFilterChange={setSelectedAuthor}
       />
       <div className="flex-1 overflow-hidden">
         <GraphView
@@ -265,6 +267,7 @@ function App() {
           repoPath={repoPath}
           onInstallHooks={handleInstallHooks}
           hooksInstalled={hooksInstalled}
+          selectedAuthor={selectedAuthor}
         />
       </div>
       <EventToast toasts={toasts} onRemove={removeToast} />

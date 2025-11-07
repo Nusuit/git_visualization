@@ -8,6 +8,7 @@ interface TimelineProps {
   onReplayClick?: () => void;
   onStopReplay?: () => void;
   isReplaying?: boolean;
+  onAuthorFilterChange?: (author: string) => void;
 }
 
 const Timeline: React.FC<TimelineProps> = ({
@@ -16,6 +17,7 @@ const Timeline: React.FC<TimelineProps> = ({
   onReplayClick,
   onStopReplay,
   isReplaying = false,
+  onAuthorFilterChange,
 }) => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedAuthor, setSelectedAuthor] = useState<string>('all');
@@ -170,7 +172,11 @@ const Timeline: React.FC<TimelineProps> = ({
               </label>
               <select
                 value={selectedAuthor}
-                onChange={(e) => setSelectedAuthor(e.target.value)}
+                onChange={(e) => {
+                  const newAuthor = e.target.value;
+                  setSelectedAuthor(newAuthor);
+                  onAuthorFilterChange?.(newAuthor);
+                }}
                 className="input w-full text-sm"
               >
                 <option value="all">All Authors ({stats.authors.length})</option>
@@ -223,6 +229,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 onClick={() => {
                   setSelectedAuthor('all');
                   setSearchQuery('');
+                  onAuthorFilterChange?.('all');
                 }}
                 className="ml-auto text-xs text-red-400 hover:text-red-300"
               >
