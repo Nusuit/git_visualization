@@ -252,7 +252,7 @@ function App() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-dark-100">
+    <div className="h-screen flex flex-col bg-white dark:bg-dark-100">
       <Timeline
         commits={commits}
         onReplayClick={handleReplay}

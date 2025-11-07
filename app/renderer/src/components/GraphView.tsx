@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { CommitNode } from '../types';
 import { GitGraphRenderer } from '../lib/gitGraph';
 import CommitDetailModal from './CommitDetailModal';
+import ThemeToggle from './ThemeToggle';
 
 interface GraphViewProps {
   commits: CommitNode[];
@@ -120,16 +121,17 @@ const GraphView: React.FC<GraphViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-dark-100">
+    <div className="flex flex-col h-full bg-white dark:bg-dark-100">
       {/* Header */}
-      <div className="bg-dark-200 border-b border-dark-300 px-6 py-4 flex items-center justify-between">
+      <div className="bg-gray-100 dark:bg-dark-200 border-b border-gray-300 dark:border-dark-300 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <h2 className="text-xl font-semibold text-white">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             {getRepoName(repoPath)}
           </h2>
-          <span className="text-gray-500 text-sm">{repoPath}</span>
+          <span className="text-gray-600 dark:text-gray-500 text-sm">{repoPath}</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
           {!hooksInstalled && (
             <motion.button
               initial={{ opacity: 0, scale: 0.8 }}
@@ -151,7 +153,7 @@ const GraphView: React.FC<GraphViewProps> = ({
       </div>
 
       {/* Graph Controls */}
-      <div className="bg-dark-200 border-b border-dark-300 px-6 py-3 flex items-center justify-between">
+      <div className="bg-gray-100 dark:bg-dark-200 border-b border-gray-300 dark:border-dark-300 px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
           {/* Zoom Controls */}
           <div className="flex items-center gap-2">
@@ -196,7 +198,7 @@ const GraphView: React.FC<GraphViewProps> = ({
       </div>
 
       {/* Graph Canvas */}
-      <div className="flex-1 overflow-auto relative bg-dark-100">
+      <div className="flex-1 overflow-auto relative bg-white dark:bg-dark-100">
         {commits.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">

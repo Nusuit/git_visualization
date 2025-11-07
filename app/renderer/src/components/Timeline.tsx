@@ -19,6 +19,7 @@ const Timeline: React.FC<TimelineProps> = ({
 }) => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedAuthor, setSelectedAuthor] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const stats = useMemo(() => {
     const authors = new Set<string>();
@@ -68,24 +69,24 @@ const Timeline: React.FC<TimelineProps> = ({
   };
 
   return (
-    <div className="bg-dark-200 border-b border-dark-300 p-4">
+    <div className="bg-gray-100 dark:bg-dark-200 border-b border-gray-300 dark:border-dark-300 p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-6">
-          <div className="text-white">
+          <div className="text-gray-900 dark:text-white">
             <span className="text-2xl font-bold">{stats.totalCommits}</span>
-            <span className="text-gray-400 text-sm ml-2">commits</span>
+            <span className="text-gray-600 dark:text-gray-400 text-sm ml-2">commits</span>
           </div>
-          <div className="text-white">
+          <div className="text-gray-900 dark:text-white">
             <span className="text-xl font-semibold">{stats.authors.length}</span>
-            <span className="text-gray-400 text-sm ml-2">authors</span>
+            <span className="text-gray-600 dark:text-gray-400 text-sm ml-2">authors</span>
           </div>
-          <div className="text-white">
+          <div className="text-gray-900 dark:text-white">
             <span className="text-xl font-semibold">{stats.branches.length || 'N/A'}</span>
-            <span className="text-gray-400 text-sm ml-2">branches</span>
+            <span className="text-gray-600 dark:text-gray-400 text-sm ml-2">branches</span>
           </div>
-          <div className="text-white">
+          <div className="text-gray-900 dark:text-white">
             <span className="text-xl font-semibold">{stats.mergeCount}</span>
-            <span className="text-gray-400 text-sm ml-2">merges</span>
+            <span className="text-gray-600 dark:text-gray-400 text-sm ml-2">merges</span>
           </div>
         </div>
 
@@ -136,19 +137,37 @@ const Timeline: React.FC<TimelineProps> = ({
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="border-t border-dark-300 pt-3 mt-3"
+          className="border-t border-dark-300 pt-4 mt-3"
         >
-          <div className="flex gap-4 items-center">
-            <div className="flex-1">
-              <label className="text-gray-400 text-sm mb-1 block">
-                Date Range
+          <div className="grid grid-cols-3 gap-4">
+            {/* Search */}
+            <div>
+              <label className="text-gray-400 text-sm mb-2 block font-medium">
+                🔍 Search Commits
               </label>
-              <div className="text-gray-300 text-sm">
-                {formatDate(stats.firstCommit)} → {formatDate(stats.lastCommit)}
-              </div>
+              <input
+                type="text"
+                placeholder="Search message, hash, author..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="input w-full text-sm"
+              />
+              {searchQuery && (
+                <p className="text-xs text-gray-500 mt-1">
+                  {commits.filter(c => 
+                    c.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    c.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    c.id.includes(searchQuery)
+                  ).length} results found
+                </p>
+              )}
             </div>
-            <div className="flex-1">
-              <label className="text-gray-400 text-sm mb-1 block">Author</label>
+
+            {/* Author Filter */}
+            <div>
+              <label className="text-gray-400 text-sm mb-2 block font-medium">
+                👤 Filter by Author
+              </label>
               <select
                 value={selectedAuthor}
                 onChange={(e) => setSelectedAuthor(e.target.value)}
@@ -161,8 +180,56 @@ const Timeline: React.FC<TimelineProps> = ({
                   </option>
                 ))}
               </select>
+              {selectedAuthor !== 'all' && (
+                <p className="text-xs text-gray-500 mt-1">
+                  {commits.filter(c => c.author === selectedAuthor).length} commits
+                </p>
+              )}
+            </div>
+
+            {/* Date Range */}
+            <div>
+              <label className="text-gray-400 text-sm mb-2 block font-medium">
+                📅 Date Range
+              </label>
+              <div className="text-gray-300 text-sm bg-dark-300 rounded px-3 py-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">From:</span>
+                  <span>{formatDate(stats.firstCommit)?.split(',')[0]}</span>
+                </div>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-gray-400">To:</span>
+                  <span>{formatDate(stats.lastCommit)?.split(',')[0]}</span>
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Active Filters Summary */}
+          {(selectedAuthor !== 'all' || searchQuery) && (
+            <div className="mt-4 pt-3 border-t border-dark-400 flex items-center gap-2">
+              <span className="text-gray-400 text-sm">Active filters:</span>
+              {selectedAuthor !== 'all' && (
+                <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">
+                  Author: {selectedAuthor}
+                </span>
+              )}
+              {searchQuery && (
+                <span className="px-2 py-1 bg-purple-600 text-white text-xs rounded-full">
+                  Search: "{searchQuery}"
+                </span>
+              )}
+              <button
+                onClick={() => {
+                  setSelectedAuthor('all');
+                  setSearchQuery('');
+                }}
+                className="ml-auto text-xs text-red-400 hover:text-red-300"
+              >
+                Clear all filters
+              </button>
+            </div>
+          )}
         </motion.div>
       )}
     </div>

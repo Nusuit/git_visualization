@@ -4,6 +4,7 @@ module.exports = {
     "./app/renderer/index.html",
     "./app/renderer/src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -12,6 +13,12 @@ module.exports = {
           200: '#2d2d2d',
           300: '#3e3e3e',
           400: '#4e4e4e',
+        },
+        light: {
+          100: '#ffffff',
+          200: '#f5f5f5',
+          300: '#e5e5e5',
+          400: '#d4d4d4',
         },
       },
       animation: {

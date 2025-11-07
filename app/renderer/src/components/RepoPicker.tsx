@@ -46,7 +46,7 @@ const RepoPicker: React.FC<RepoPickerProps> = ({ onRepoSelected }) => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-dark-100 p-8">
+    <div className="flex items-center justify-center min-h-screen bg-white dark:bg-dark-100 p-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -54,10 +54,10 @@ const RepoPicker: React.FC<RepoPickerProps> = ({ onRepoSelected }) => {
         className="max-w-2xl w-full"
       >
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-white mb-4">
+          <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">
             Git Flow Visualizer
           </h1>
-          <p className="text-gray-400 text-lg">
+          <p className="text-gray-600 dark:text-gray-400 text-lg">
             Visualize your Git repository in real-time
           </p>
         </div>
