@@ -268,6 +268,7 @@ function App() {
           onInstallHooks={handleInstallHooks}
           hooksInstalled={hooksInstalled}
           selectedAuthor={selectedAuthor}
+          isReplaying={isReplaying}
         />
       </div>
       <EventToast toasts={toasts} onRemove={removeToast} />

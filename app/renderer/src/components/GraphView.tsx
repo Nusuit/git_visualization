@@ -12,6 +12,7 @@ interface GraphViewProps {
   onInstallHooks: () => void;
   hooksInstalled: boolean;
   selectedAuthor?: string;
+  isReplaying?: boolean;
 }
 
 const GraphView: React.FC<GraphViewProps> = ({
@@ -20,6 +21,7 @@ const GraphView: React.FC<GraphViewProps> = ({
   onInstallHooks,
   hooksInstalled,
   selectedAuthor = 'all',
+  isReplaying = false,
 }) => {
   const { theme } = useTheme();
   const graphContainerRef = useRef<HTMLDivElement>(null);
@@ -75,7 +77,7 @@ const GraphView: React.FC<GraphViewProps> = ({
           }
         });
         
-        // Zoom to first matching commit
+        // Zoom to first matching commit (when filtering)
         if (firstMatchingDot && selectedAuthor !== 'all') {
           // Get SVG coordinates of the commit dot
           const cx = parseFloat(firstMatchingDot.getAttribute('cx') || '0');
@@ -100,10 +102,35 @@ const GraphView: React.FC<GraphViewProps> = ({
             setZoom(targetZoom);
             setPanOffset({ x: offsetX, y: offsetY });
           }
-        } else if (selectedAuthor === 'all') {
-          // Reset zoom when no filter
+        } else if (selectedAuthor === 'all' && !isReplaying) {
+          // Reset zoom when no filter and not replaying
           setZoom(1);
           setPanOffset({ x: 0, y: 0 });
+        }
+        
+        // Auto zoom to latest commit when replaying
+        if (isReplaying && commitDots && commitDots.length > 0) {
+          const lastDot = commitDots[commitDots.length - 1] as HTMLElement;
+          if (lastDot) {
+            const cx = parseFloat(lastDot.getAttribute('cx') || '0');
+            const cy = parseFloat(lastDot.getAttribute('cy') || '0');
+            
+            const container = graphContainerRef.current?.parentElement;
+            if (container) {
+              const containerWidth = container.clientWidth;
+              const containerHeight = container.clientHeight;
+              
+              const centerX = containerWidth / 2;
+              const centerY = containerHeight / 2;
+              
+              const targetZoom = 1.5;
+              const offsetX = centerX - (cx * targetZoom);
+              const offsetY = centerY - (cy * targetZoom);
+              
+              setZoom(targetZoom);
+              setPanOffset({ x: offsetX, y: offsetY });
+            }
+          }
         }
       }, 100);
     }
@@ -111,7 +138,7 @@ const GraphView: React.FC<GraphViewProps> = ({
     return () => {
       // Don't destroy on every render, only on unmount
     };
-  }, [commits, theme, selectedAuthor]);
+  }, [commits, theme, selectedAuthor, isReplaying]);
 
   useEffect(() => {
     // Cleanup on unmount
