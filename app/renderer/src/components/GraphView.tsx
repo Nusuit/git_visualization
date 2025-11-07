@@ -1,10 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
-import { CommitNode } from '../types';
-import { GitGraphRenderer } from '../lib/gitGraph';
-import CommitDetailModal from './CommitDetailModal';
-import ThemeToggle from './ThemeToggle';
-import { useTheme } from '../contexts/ThemeContext';
+import React, { useEffect, useRef, useState } from "react";
+import { CommitNode } from "../types";
+import { GitGraphRenderer } from "../lib/gitGraph";
+import CommitDetailModal from "./CommitDetailModal";
+import { useTheme } from "../contexts/ThemeContext";
 
 interface GraphViewProps {
   commits: CommitNode[];
@@ -17,10 +15,7 @@ interface GraphViewProps {
 
 const GraphView: React.FC<GraphViewProps> = ({
   commits,
-  repoPath,
-  onInstallHooks,
-  hooksInstalled,
-  selectedAuthor = 'all',
+  selectedAuthor = "all",
   isReplaying = false,
 }) => {
   const { theme } = useTheme();
@@ -34,103 +29,100 @@ const GraphView: React.FC<GraphViewProps> = ({
 
   useEffect(() => {
     if (graphContainerRef.current && commits.length > 0) {
-      // Always recreate graph to ensure fresh render
-      if (gitGraphRef.current) {
+      // During replay, only add new commits incrementally
+      if (isReplaying && gitGraphRef.current && commits.length > 0) {
+        // Just render all commits (gitgraph will handle the diff)
         gitGraphRef.current.destroy();
-        gitGraphRef.current = null;
+        gitGraphRef.current = new GitGraphRenderer(graphContainerRef.current, {
+          orientation: "horizontal-reverse", // Try horizontal-reverse
+          mode: "compact",
+          theme: theme,
+        });
+        gitGraphRef.current.renderCommits(commits);
+        console.log(
+          "[GraphView] Replay: Re-rendered with",
+          commits.length,
+          "commits"
+        );
+      } else {
+        // Normal mode: recreate graph
+        if (gitGraphRef.current) {
+          gitGraphRef.current.destroy();
+          gitGraphRef.current = null;
+        }
+
+        gitGraphRef.current = new GitGraphRenderer(graphContainerRef.current, {
+          orientation: "horizontal-reverse", // Try horizontal-reverse
+          mode: "compact",
+          theme: theme,
+        });
+        gitGraphRef.current.renderCommits(commits);
+        console.log("[GraphView] Normal: Rendered", commits.length, "commits");
       }
-
-      gitGraphRef.current = new GitGraphRenderer(graphContainerRef.current, {
-        orientation: 'vertical-reverse',
-        mode: 'compact',
-        theme: theme,
-      });
-
-      gitGraphRef.current.renderCommits(commits);
 
       // Add click handlers to commit dots after rendering
       setTimeout(() => {
-        const commitDots = graphContainerRef.current?.querySelectorAll('circle');
-        let firstMatchingDot: HTMLElement | null = null;
-        
+        const commitDots =
+          graphContainerRef.current?.querySelectorAll("circle");
+        let firstMatchingDot: SVGCircleElement | null = null;
+
         commitDots?.forEach((dot, index) => {
-          const htmlDot = dot as HTMLElement;
-          htmlDot.style.cursor = 'pointer';
-          htmlDot.addEventListener('click', (e) => {
+          const svgDot = dot as SVGCircleElement;
+          svgDot.style.cursor = "pointer";
+          svgDot.addEventListener("click", (e) => {
             e.stopPropagation();
             // Find commit by index (gitgraph renders in order)
             if (commits[index]) {
               setSelectedCommit(commits[index]);
             }
           });
-          
+
           // Add highlight class for matching author
           if (commits[index]) {
-            if (selectedAuthor !== 'all' && commits[index].author === selectedAuthor) {
-              htmlDot.classList.add('highlight-commit');
+            if (
+              selectedAuthor !== "all" &&
+              commits[index].author === selectedAuthor
+            ) {
+              svgDot.classList.add("highlight-commit");
               if (!firstMatchingDot) {
-                firstMatchingDot = htmlDot;
+                firstMatchingDot = svgDot as SVGCircleElement;
               }
             } else {
-              htmlDot.classList.remove('highlight-commit');
+              svgDot.classList.remove("highlight-commit");
             }
           }
         });
-        
+
         // Zoom to first matching commit (when filtering)
-        if (firstMatchingDot && selectedAuthor !== 'all') {
+        if (firstMatchingDot && selectedAuthor !== "all") {
           // Get SVG coordinates of the commit dot
-          const cx = parseFloat(firstMatchingDot.getAttribute('cx') || '0');
-          const cy = parseFloat(firstMatchingDot.getAttribute('cy') || '0');
-          
+          const matchingDot = firstMatchingDot as SVGCircleElement;
+          const cx = parseFloat(matchingDot.getAttribute("cx") || "0");
+          const cy = parseFloat(matchingDot.getAttribute("cy") || "0");
+
           // Get container dimensions
           const container = graphContainerRef.current?.parentElement;
           if (container) {
             const containerWidth = container.clientWidth;
             const containerHeight = container.clientHeight;
-            
+
             // Calculate center of viewport
             const centerX = containerWidth / 2;
             const centerY = containerHeight / 2;
-            
+
             // Calculate offset to center the dot
             const targetZoom = 1.8;
-            const offsetX = centerX - (cx * targetZoom);
-            const offsetY = centerY - (cy * targetZoom);
-            
+            const offsetX = centerX - cx * targetZoom;
+            const offsetY = centerY - cy * targetZoom;
+
             // Apply zoom and pan with smooth transition
             setZoom(targetZoom);
             setPanOffset({ x: offsetX, y: offsetY });
           }
-        } else if (selectedAuthor === 'all' && !isReplaying) {
+        } else if (selectedAuthor === "all" && !isReplaying) {
           // Reset zoom when no filter and not replaying
           setZoom(1);
           setPanOffset({ x: 0, y: 0 });
-        }
-        
-        // Auto zoom to latest commit when replaying
-        if (isReplaying && commitDots && commitDots.length > 0) {
-          const lastDot = commitDots[commitDots.length - 1] as HTMLElement;
-          if (lastDot) {
-            const cx = parseFloat(lastDot.getAttribute('cx') || '0');
-            const cy = parseFloat(lastDot.getAttribute('cy') || '0');
-            
-            const container = graphContainerRef.current?.parentElement;
-            if (container) {
-              const containerWidth = container.clientWidth;
-              const containerHeight = container.clientHeight;
-              
-              const centerX = containerWidth / 2;
-              const centerY = containerHeight / 2;
-              
-              const targetZoom = 1.5;
-              const offsetX = centerX - (cx * targetZoom);
-              const offsetY = centerY - (cy * targetZoom);
-              
-              setZoom(targetZoom);
-              setPanOffset({ x: offsetX, y: offsetY });
-            }
-          }
         }
       }, 100);
     }
@@ -139,6 +131,59 @@ const GraphView: React.FC<GraphViewProps> = ({
       // Don't destroy on every render, only on unmount
     };
   }, [commits, theme, selectedAuthor, isReplaying]);
+
+  // Separate effect to handle camera tracking during replay
+  useEffect(() => {
+    if (!isReplaying || commits.length === 0) return;
+
+    console.log("[GraphView] Camera tracking for", commits.length, "commits");
+
+    // SOLUTION: Don't track node position (it's always the same after re-render)
+    // Instead, calculate camera position based on NUMBER of commits
+    // Each commit adds approximately 50px in height (COMMIT_SPACING from gitGraph config)
+
+    const timeoutId = setTimeout(() => {
+      const COMMIT_SPACING = 50; // From gitGraph.ts
+      const INITIAL_OFFSET = 14; // First commit position
+
+      // Calculate expected position of the latest commit
+      // In horizontal-reverse, commits stack vertically downward
+      const expectedY = INITIAL_OFFSET + (commits.length - 1) * COMMIT_SPACING;
+      const expectedX = 14; // X stays constant in horizontal mode
+
+      console.log("[GraphView] Expected latest commit position:", {
+        x: expectedX,
+        y: expectedY,
+      });
+
+      const container = graphContainerRef.current?.parentElement;
+      if (container) {
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+
+        const centerX = containerWidth / 2;
+        const centerY = containerHeight / 2;
+
+        const targetZoom = 1.0; // 100% zoom - no zoom in during replay
+
+        // Center camera on the expected position
+        const offsetX = centerX - expectedX * targetZoom;
+        const offsetY = centerY - expectedY * targetZoom;
+
+        console.log(
+          "[GraphView] Camera move to:",
+          `X:${Math.round(offsetX)} Y:${Math.round(
+            offsetY
+          )} (expectedY=${expectedY})`
+        );
+
+        setZoom(targetZoom);
+        setPanOffset({ x: offsetX, y: offsetY });
+      }
+    }, 400);
+
+    return () => clearTimeout(timeoutId);
+  }, [commits.length, isReplaying]);
 
   useEffect(() => {
     // Cleanup on unmount
@@ -164,7 +209,11 @@ const GraphView: React.FC<GraphViewProps> = ({
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 0) { // Left mouse button
+    // Disable panning during replay to avoid conflicts
+    if (isReplaying) return;
+
+    if (e.button === 0) {
+      // Left mouse button
       setIsPanning(true);
       setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
     }
@@ -188,55 +237,27 @@ const GraphView: React.FC<GraphViewProps> = ({
   };
 
   const handleWheel = (e: React.WheelEvent) => {
+    // Disable manual zoom during replay
+    if (isReplaying) return;
+
     e.preventDefault();
     e.stopPropagation(); // Prevent scroll from affecting page
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
     setZoom((prev) => Math.max(0.3, Math.min(3, prev + delta)));
   };
 
-  const getRepoName = (path: string) => {
-    const parts = path.split(/[\\/]/);
-    return parts[parts.length - 1];
-  };
-
   return (
     <div className="flex flex-col h-full bg-white dark:bg-dark-100">
-      {/* Header */}
-      <div className="bg-gray-100 dark:bg-dark-200 border-b border-gray-300 dark:border-dark-300 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            {getRepoName(repoPath)}
-          </h2>
-          <span className="text-gray-600 dark:text-gray-500 text-sm">{repoPath}</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          {!hooksInstalled && (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              onClick={onInstallHooks}
-              className="btn bg-yellow-600 hover:bg-yellow-700 text-white flex items-center gap-2"
-            >
-              <span>⚠️</span>
-              Install Git Hooks
-            </motion.button>
-          )}
-          {hooksInstalled && (
-            <div className="flex items-center gap-2 text-green-500 text-sm">
-              <span>✓</span>
-              Hooks Active
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Header removed - moved to Timeline */}
 
       {/* Graph Controls */}
       <div className="bg-gray-100 dark:bg-dark-200 border-b border-gray-300 dark:border-dark-300 px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
           {/* Zoom Controls */}
           <div className="flex items-center gap-2">
-            <span className="text-gray-600 dark:text-gray-400 text-sm font-medium">🔍 Zoom:</span>
+            <span className="text-gray-600 dark:text-gray-400 text-sm font-medium">
+              🔍 Zoom:
+            </span>
             <button
               onClick={handleZoomOut}
               className="w-8 h-8 bg-gray-200 dark:bg-dark-300 hover:bg-gray-300 dark:hover:bg-dark-400 rounded flex items-center justify-center text-gray-900 dark:text-white text-lg font-bold transition-colors"
@@ -265,19 +286,32 @@ const GraphView: React.FC<GraphViewProps> = ({
 
           {/* Instructions */}
           <div className="border-l border-gray-300 dark:border-dark-400 pl-4 flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
-            <span>🖱️ <strong>Drag</strong> to pan</span>
-            <span>🖲️ <strong>Scroll</strong> to zoom</span>
-            <span>🖱️ <strong>Click commit</strong> for details</span>
+            <span>
+              🖱️ <strong>Drag</strong> to pan
+            </span>
+            <span>
+              🖲️ <strong>Scroll</strong> to zoom
+            </span>
+            <span>
+              🖱️ <strong>Click commit</strong> for details
+            </span>
           </div>
         </div>
 
         <div className="text-gray-600 dark:text-gray-400 text-sm">
-          <span className="font-semibold text-gray-900 dark:text-white">{commits.length}</span> commit{commits.length !== 1 ? 's' : ''} loaded
+          <span className="font-semibold text-gray-900 dark:text-white">
+            {commits.length}
+          </span>{" "}
+          commit{commits.length !== 1 ? "s" : ""} loaded
         </div>
       </div>
 
       {/* Graph Canvas */}
-      <div className={`flex-1 overflow-hidden relative bg-white dark:bg-dark-100 ${selectedAuthor !== 'all' ? 'filtered-view' : ''}`}>
+      <div
+        className={`flex-1 overflow-hidden relative bg-white dark:bg-dark-100 ${
+          selectedAuthor !== "all" ? "filtered-view" : ""
+        }`}
+      >
         {commits.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
@@ -289,8 +323,8 @@ const GraphView: React.FC<GraphViewProps> = ({
           <div
             className="w-full min-h-full flex items-start justify-center py-8"
             style={{
-              cursor: isPanning ? 'grabbing' : 'grab',
-              backgroundColor: theme === 'dark' ? '#1e1e1e' : '#ffffff',
+              cursor: isPanning ? "grabbing" : "grab",
+              backgroundColor: theme === "dark" ? "#1e1e1e" : "#ffffff",
             }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
@@ -302,18 +336,22 @@ const GraphView: React.FC<GraphViewProps> = ({
               className="graph-container inline-block"
               style={{
                 transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
-                transformOrigin: 'top center',
-                transition: isPanning ? 'none' : 'transform 0.1s ease-out',
-                minHeight: 'fit-content',
-                backgroundColor: theme === 'dark' ? '#1e1e1e' : '#ffffff',
+                transformOrigin: "top center",
+                transition: isReplaying
+                  ? "transform 0.3s ease-out"
+                  : isPanning
+                  ? "none"
+                  : "transform 0.1s ease-out",
+                minHeight: "fit-content",
+                backgroundColor: theme === "dark" ? "#1e1e1e" : "#ffffff",
               }}
             >
-              <div 
-                ref={graphContainerRef} 
+              <div
+                ref={graphContainerRef}
                 className="graph-canvas"
                 style={{
-                  minHeight: '100%',
-                  display: 'inline-block',
+                  minHeight: "100%",
+                  display: "inline-block",
                 }}
               />
             </div>
@@ -331,4 +369,3 @@ const GraphView: React.FC<GraphViewProps> = ({
 };
 
 export default GraphView;
-

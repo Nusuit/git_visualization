@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 interface RepoPickerProps {
   onRepoSelected: (repoPath: string) => void;
@@ -18,7 +18,7 @@ const RepoPicker: React.FC<RepoPickerProps> = ({ onRepoSelected }) => {
       const repos = await window.electronAPI.getRecentRepos();
       setRecentRepos(repos);
     } catch (error) {
-      console.error('Failed to load recent repos:', error);
+      console.error("Failed to load recent repos:", error);
     }
   };
 
@@ -30,7 +30,7 @@ const RepoPicker: React.FC<RepoPickerProps> = ({ onRepoSelected }) => {
         onRepoSelected(repoPath);
       }
     } catch (error) {
-      console.error('Failed to select repo:', error);
+      console.error("Failed to select repo:", error);
     } finally {
       setLoading(false);
     }
@@ -89,7 +89,7 @@ const RepoPicker: React.FC<RepoPickerProps> = ({ onRepoSelected }) => {
                 Loading...
               </span>
             ) : (
-              '📁 Select Repository'
+              "📁 Select Repository"
             )}
           </button>
         </div>
@@ -101,7 +101,7 @@ const RepoPicker: React.FC<RepoPickerProps> = ({ onRepoSelected }) => {
             transition={{ delay: 0.2 }}
             className="card"
           >
-            <h2 className="text-xl font-semibold text-white mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
               Recent Repositories
             </h2>
             <div className="space-y-2">
@@ -112,16 +112,18 @@ const RepoPicker: React.FC<RepoPickerProps> = ({ onRepoSelected }) => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
                   onClick={() => handleRecentRepoClick(repo)}
-                  className="w-full text-left px-4 py-3 bg-dark-300 hover:bg-dark-400 rounded-lg transition-colors flex items-center gap-3 group"
+                  className="w-full text-left px-4 py-3 bg-gray-100 dark:bg-dark-300 hover:bg-gray-200 dark:hover:bg-dark-400 rounded-lg transition-colors flex items-center gap-3 group"
                 >
                   <span className="text-2xl">📂</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-medium group-hover:text-blue-400 transition-colors">
+                    <p className="text-gray-900 dark:text-white font-medium group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                       {getRepoName(repo)}
                     </p>
-                    <p className="text-gray-500 text-sm truncate">{repo}</p>
+                    <p className="text-gray-500 dark:text-gray-500 text-sm truncate">
+                      {repo}
+                    </p>
                   </div>
-                  <span className="text-gray-600 group-hover:text-gray-400 transition-colors">
+                  <span className="text-gray-400 dark:text-gray-600 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors">
                     →
                   </span>
                 </motion.button>
@@ -139,4 +141,3 @@ const RepoPicker: React.FC<RepoPickerProps> = ({ onRepoSelected }) => {
 };
 
 export default RepoPicker;
-

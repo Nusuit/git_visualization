@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import RepoPicker from './components/RepoPicker';
-import GraphView from './components/GraphView';
-import Timeline from './components/Timeline';
-import EventToast from './components/EventToast';
-import { socketClient } from './lib/socket';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import RepoPicker from "./components/RepoPicker";
+import GraphView from "./components/GraphView";
+import Timeline from "./components/Timeline";
+import EventToast from "./components/EventToast";
+import { socketClient } from "./lib/socket";
 import {
   CommitNode,
   InitialGraphPayload,
   GitEventPayload,
   ToastPayload,
   ToastItem,
-} from './types';
+} from "./types";
 
 function App() {
   const [repoPath, setRepoPath] = useState<string | null>(null);
@@ -19,7 +19,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [hooksInstalled, setHooksInstalled] = useState(false);
   const [isReplaying, setIsReplaying] = useState(false);
-  const [selectedAuthor, setSelectedAuthor] = useState<string>('all');
+  const [selectedAuthor, setSelectedAuthor] = useState<string>("all");
   const stopReplayRef = useRef(false);
 
   useEffect(() => {
@@ -27,39 +27,43 @@ function App() {
     socketClient
       .connect()
       .then(() => {
-        console.log('[App] Socket connected');
+        console.log("[App] Socket connected");
       })
       .catch((error) => {
-        console.error('[App] Socket connection failed:', error);
+        console.error("[App] Socket connection failed:", error);
         addToast({
-          type: 'error',
-          message: 'Failed to connect to backend server',
+          type: "error",
+          message: "Failed to connect to backend server",
         });
       });
 
     // Setup socket event listeners
-    socketClient.on('initial_graph', handleInitialGraph);
-    socketClient.on('git_event', handleGitEvent);
-    socketClient.on('toast', handleToast);
-    socketClient.on('error', handleError);
+    socketClient.on("initial_graph", handleInitialGraph);
+    socketClient.on("git_event", handleGitEvent);
+    socketClient.on("toast", handleToast);
+    socketClient.on("error", handleError);
 
     return () => {
-      socketClient.off('initial_graph', handleInitialGraph);
-      socketClient.off('git_event', handleGitEvent);
-      socketClient.off('toast', handleToast);
-      socketClient.off('error', handleError);
+      socketClient.off("initial_graph", handleInitialGraph);
+      socketClient.off("git_event", handleGitEvent);
+      socketClient.off("toast", handleToast);
+      socketClient.off("error", handleError);
       socketClient.disconnect();
     };
   }, []);
 
   const handleInitialGraph = useCallback((data: InitialGraphPayload) => {
-    console.log('[App] Received initial graph:', data.commits.length, 'commits');
+    console.log(
+      "[App] Received initial graph:",
+      data.commits.length,
+      "commits"
+    );
     setCommits(data.commits);
     setLoading(false);
   }, []);
 
   const handleGitEvent = useCallback((data: GitEventPayload) => {
-    console.log('[App] Received git event:', data.type);
+    console.log("[App] Received git event:", data.type);
 
     if (data.commit) {
       setCommits((prev) => {
@@ -79,7 +83,7 @@ function App() {
 
   const handleError = useCallback((data: { message: string }) => {
     addToast({
-      type: 'error',
+      type: "error",
       message: data.message,
     });
   }, []);
@@ -105,20 +109,20 @@ function App() {
       const result = await window.electronAPI.loadRepo(selectedRepoPath);
       if (result.success) {
         // Wait for initial graph from socket
-        console.log('[App] Repository loaded successfully');
+        console.log("[App] Repository loaded successfully");
       } else {
         addToast({
-          type: 'error',
-          message: result.error || 'Failed to load repository',
+          type: "error",
+          message: result.error || "Failed to load repository",
         });
         setRepoPath(null);
         setLoading(false);
       }
     } catch (error) {
-      console.error('[App] Error loading repo:', error);
+      console.error("[App] Error loading repo:", error);
       addToast({
-        type: 'error',
-        message: 'Failed to load repository',
+        type: "error",
+        message: "Failed to load repository",
       });
       setRepoPath(null);
       setLoading(false);
@@ -133,20 +137,20 @@ function App() {
       if (result.success) {
         setHooksInstalled(true);
         addToast({
-          type: 'success',
-          message: 'Git hooks installed successfully',
+          type: "success",
+          message: "Git hooks installed successfully",
         });
       } else {
         addToast({
-          type: 'error',
-          message: result.error || 'Failed to install hooks',
+          type: "error",
+          message: result.error || "Failed to install hooks",
         });
       }
     } catch (error) {
-      console.error('[App] Error installing hooks:', error);
+      console.error("[App] Error installing hooks:", error);
       addToast({
-        type: 'error',
-        message: 'Failed to install hooks',
+        type: "error",
+        message: "Failed to install hooks",
       });
     }
   };
@@ -156,10 +160,10 @@ function App() {
 
     setIsReplaying(true);
     stopReplayRef.current = false;
-    
+
     addToast({
-      type: 'info',
-      message: 'Starting replay mode - replaying chronologically',
+      type: "info",
+      message: "Starting replay mode - replaying chronologically",
     });
 
     // Sort commits by date (oldest first)
@@ -177,7 +181,7 @@ function App() {
       // Check if user stopped replay
       if (stopReplayRef.current) {
         addToast({
-          type: 'warning',
+          type: "warning",
           message: `Replay stopped at ${i} / ${sortedCommits.length} commits`,
         });
         break;
@@ -185,21 +189,21 @@ function App() {
 
       await new Promise((resolve) => setTimeout(resolve, 500));
       setCommits((prev) => [...prev, sortedCommits[i]]);
-      
+
       // Show progress toast every 10 commits
       if ((i + 1) % 10 === 0 || i === sortedCommits.length - 1) {
         addToast({
-          type: 'info',
+          type: "info",
           message: `Replaying: ${i + 1} / ${sortedCommits.length} commits`,
         });
       }
     }
 
     setIsReplaying(false);
-    
+
     if (!stopReplayRef.current) {
       addToast({
-        type: 'success',
+        type: "success",
         message: `Replay complete! Showed ${sortedCommits.length} commits`,
       });
     }
@@ -209,8 +213,8 @@ function App() {
     stopReplayRef.current = true;
     setIsReplaying(false);
     addToast({
-      type: 'info',
-      message: 'Stopping replay...',
+      type: "info",
+      message: "Stopping replay...",
     });
   };
 
@@ -256,10 +260,13 @@ function App() {
     <div className="h-screen flex flex-col bg-white dark:bg-dark-100">
       <Timeline
         commits={commits}
+        repoPath={repoPath}
         onReplayClick={handleReplay}
         onStopReplay={handleStopReplay}
         isReplaying={isReplaying}
         onAuthorFilterChange={setSelectedAuthor}
+        onInstallHooks={handleInstallHooks}
+        hooksInstalled={hooksInstalled}
       />
       <div className="flex-1 overflow-hidden">
         <GraphView
@@ -277,4 +284,3 @@ function App() {
 }
 
 export default App;
-
