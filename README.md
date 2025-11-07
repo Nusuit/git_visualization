@@ -64,6 +64,7 @@ npm run build
 ## 🎬 Replay Feature
 
 The replay mode lets you watch your entire Git history unfold chronologically:
+
 - Camera automatically follows new commits
 - Smooth animations and transitions
 - Progress indicators
@@ -89,6 +90,7 @@ npm run type-check       # Check TypeScript errors
 ## � Build Output
 
 After running `npm run build`, find the installer in:
+
 ```
 release/
 └── Git Flow Visualizer Setup 1.0.0.exe
