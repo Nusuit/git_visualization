@@ -42,19 +42,19 @@ export class GitGraphRenderer {
         ],
         branch: {
           lineWidth: 5,
-          spacing: 50,
+          spacing: 40,
           label: {
             display: true,
             bgColor: isLight ? '#f0f0f0' : '#2d2d2d',
             color: isLight ? '#1a1a1a' : '#ffffff',
-            borderRadius: 8,
-            font: 'bold 11px "Segoe UI", sans-serif',
+            borderRadius: 10,
+            font: 'bold 14px "Segoe UI", sans-serif',
           },
         },
         commit: {
-          spacing: 60,
+          spacing: 50,
           dot: {
-            size: 12,
+            size: 14,
             strokeWidth: 3,
             strokeColor: isLight ? '#333333' : '#ffffff',
           },
@@ -63,7 +63,7 @@ export class GitGraphRenderer {
             displayAuthor: true,
             displayHash: false,
             color: isLight ? '#333333' : '#e0e0e0',
-            font: 'normal 13px "Segoe UI", sans-serif',
+            font: 'normal 14px "Segoe UI", sans-serif',
           },
         },
         arrow: {
