@@ -118,8 +118,8 @@ code {
   @apply w-full h-full;
 }
 
-/* Graph SVG background */
+/* Graph SVG - transparent background to blend with parent */
 .graph-canvas svg {
-  @apply bg-white dark:bg-dark-100;
+  background: transparent !important;
 }
 

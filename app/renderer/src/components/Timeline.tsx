@@ -137,12 +137,12 @@ const Timeline: React.FC<TimelineProps> = ({
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
-          className="border-t border-dark-300 pt-4 mt-3"
+          className="border-t border-gray-300 dark:border-dark-300 pt-4 mt-3"
         >
           <div className="grid grid-cols-3 gap-4">
             {/* Search */}
             <div>
-              <label className="text-gray-400 text-sm mb-2 block font-medium">
+              <label className="text-gray-600 dark:text-gray-400 text-sm mb-2 block font-medium">
                 🔍 Search Commits
               </label>
               <input
@@ -153,7 +153,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 className="input w-full text-sm"
               />
               {searchQuery && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                   {commits.filter(c => 
                     c.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
                     c.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -165,7 +165,7 @@ const Timeline: React.FC<TimelineProps> = ({
 
             {/* Author Filter */}
             <div>
-              <label className="text-gray-400 text-sm mb-2 block font-medium">
+              <label className="text-gray-600 dark:text-gray-400 text-sm mb-2 block font-medium">
                 👤 Filter by Author
               </label>
               <select
@@ -181,7 +181,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 ))}
               </select>
               {selectedAuthor !== 'all' && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                   {commits.filter(c => c.author === selectedAuthor).length} commits
                 </p>
               )}
@@ -189,17 +189,17 @@ const Timeline: React.FC<TimelineProps> = ({
 
             {/* Date Range */}
             <div>
-              <label className="text-gray-400 text-sm mb-2 block font-medium">
+              <label className="text-gray-600 dark:text-gray-400 text-sm mb-2 block font-medium">
                 📅 Date Range
               </label>
-              <div className="text-gray-300 text-sm bg-dark-300 rounded px-3 py-2">
+              <div className="text-gray-700 dark:text-gray-300 text-sm bg-white dark:bg-dark-300 rounded px-3 py-2 border border-gray-300 dark:border-dark-400">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400">From:</span>
-                  <span>{formatDate(stats.firstCommit)?.split(',')[0]}</span>
+                  <span className="text-gray-500 dark:text-gray-400">From:</span>
+                  <span className="text-gray-900 dark:text-gray-200">{formatDate(stats.firstCommit)?.split(',')[0]}</span>
                 </div>
                 <div className="flex items-center justify-between mt-1">
-                  <span className="text-gray-400">To:</span>
-                  <span>{formatDate(stats.lastCommit)?.split(',')[0]}</span>
+                  <span className="text-gray-500 dark:text-gray-400">To:</span>
+                  <span className="text-gray-900 dark:text-gray-200">{formatDate(stats.lastCommit)?.split(',')[0]}</span>
                 </div>
               </div>
             </div>
@@ -207,8 +207,8 @@ const Timeline: React.FC<TimelineProps> = ({
 
           {/* Active Filters Summary */}
           {(selectedAuthor !== 'all' || searchQuery) && (
-            <div className="mt-4 pt-3 border-t border-dark-400 flex items-center gap-2">
-              <span className="text-gray-400 text-sm">Active filters:</span>
+            <div className="mt-4 pt-3 border-t border-gray-300 dark:border-dark-400 flex items-center gap-2">
+              <span className="text-gray-600 dark:text-gray-400 text-sm">Active filters:</span>
               {selectedAuthor !== 'all' && (
                 <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">
                   Author: {selectedAuthor}

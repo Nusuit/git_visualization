@@ -214,6 +214,7 @@ const GraphView: React.FC<GraphViewProps> = ({
             className="w-full min-h-full flex items-start justify-center py-8"
             style={{
               cursor: isPanning ? 'grabbing' : 'grab',
+              backgroundColor: theme === 'dark' ? '#1e1e1e' : '#ffffff',
             }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
@@ -228,11 +229,12 @@ const GraphView: React.FC<GraphViewProps> = ({
                 transformOrigin: 'top center',
                 transition: isPanning ? 'none' : 'transform 0.1s ease-out',
                 minHeight: 'fit-content',
+                backgroundColor: theme === 'dark' ? '#1e1e1e' : '#ffffff',
               }}
             >
               <div 
                 ref={graphContainerRef} 
-                className="graph-canvas bg-white dark:bg-[#1a1a1a]"
+                className="graph-canvas"
                 style={{
                   minHeight: '100%',
                   display: 'inline-block',

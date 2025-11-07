@@ -45,7 +45,7 @@ export class GitGraphRenderer {
           spacing: 40,
           label: {
             display: true,
-            bgColor: isLight ? '#f0f0f0' : '#2d2d2d',
+            bgColor: isLight ? '#e5e5e5' : '#3d3d3d',
             color: isLight ? '#1a1a1a' : '#ffffff',
             borderRadius: 10,
             font: 'bold 14px "Segoe UI", sans-serif',
@@ -56,19 +56,19 @@ export class GitGraphRenderer {
           dot: {
             size: 14,
             strokeWidth: 3,
-            strokeColor: isLight ? '#333333' : '#ffffff',
+            strokeColor: isLight ? '#1a1a1a' : '#ffffff',
           },
           message: {
             display: true,
             displayAuthor: true,
             displayHash: false,
-            color: isLight ? '#333333' : '#e0e0e0',
+            color: isLight ? '#1a1a1a' : '#e5e5e5',
             font: 'normal 14px "Segoe UI", sans-serif',
           },
         },
         arrow: {
           size: 10,
-          color: isLight ? '#999999' : '#666666',
+          color: isLight ? '#666666' : '#999999',
         },
       },
     };
