@@ -1,10 +1,10 @@
-import { createGitgraph, GitgraphOptions, Commit } from '@gitgraph/js';
-import { CommitNode } from '../types';
+import { createGitgraph } from "@gitgraph/js";
+import { CommitNode } from "../types";
 
 export interface GraphConfig {
-  orientation?: 'vertical-reverse' | 'horizontal' | 'horizontal-reverse';
-  mode?: 'compact' | 'extended';
-  theme?: 'light' | 'dark';
+  orientation?: "vertical-reverse" | "horizontal" | "horizontal-reverse";
+  mode?: "compact" | "extended";
+  theme?: "light" | "dark";
 }
 
 export class GitGraphRenderer {
@@ -12,41 +12,41 @@ export class GitGraphRenderer {
   private container: HTMLElement;
   private branches: Map<string, any> = new Map();
   private commitMap: Map<string, any> = new Map();
-  private theme: 'light' | 'dark' = 'dark';
+  private theme: "light" | "dark" = "dark";
 
   constructor(container: HTMLElement, config: GraphConfig = {}) {
     this.container = container;
-    this.theme = config.theme || 'dark';
+    this.theme = config.theme || "dark";
     this.initialize(config);
   }
 
   private initialize(config: GraphConfig): void {
     // Clear container
-    this.container.innerHTML = '';
+    this.container.innerHTML = "";
 
-    const isLight = this.theme === 'light';
+    const isLight = this.theme === "light";
 
-    const options: GitgraphOptions = {
-      orientation: config.orientation || 'vertical-reverse',
-      mode: config.mode || 'compact',
+    const options: any = {
+      orientation: config.orientation || "vertical-reverse",
+      mode: config.mode || "compact",
       template: {
         colors: [
-          '#FF6B9D', // Hot pink
-          '#00D9FF', // Cyan
-          '#FFD93D', // Yellow
-          '#6BCF7F', // Green
-          '#C77DFF', // Purple
-          '#FF8C42', // Orange
-          '#4CC9F0', // Light blue
-          '#F72585', // Magenta
+          "#FF6B9D", // Hot pink
+          "#00D9FF", // Cyan
+          "#FFD93D", // Yellow
+          "#6BCF7F", // Green
+          "#C77DFF", // Purple
+          "#FF8C42", // Orange
+          "#4CC9F0", // Light blue
+          "#F72585", // Magenta
         ],
         branch: {
           lineWidth: 5,
           spacing: 40,
           label: {
             display: true,
-            bgColor: isLight ? '#e5e5e5' : '#3d3d3d',
-            color: isLight ? '#1a1a1a' : '#ffffff',
+            bgColor: isLight ? "#e5e5e5" : "#3d3d3d",
+            color: isLight ? "#1a1a1a" : "#ffffff",
             borderRadius: 10,
             font: 'bold 14px "Segoe UI", sans-serif',
           },
@@ -56,19 +56,19 @@ export class GitGraphRenderer {
           dot: {
             size: 14,
             strokeWidth: 3,
-            strokeColor: isLight ? '#fbbf24' : '#fbbf24', // Yellow
+            strokeColor: isLight ? "#fbbf24" : "#fbbf24", // Yellow
           },
           message: {
             display: true,
             displayAuthor: true,
             displayHash: false,
-            color: isLight ? '#1a1a1a' : '#e5e5e5',
+            color: isLight ? "#1a1a1a" : "#e5e5e5",
             font: 'normal 14px "Segoe UI", sans-serif',
           },
         },
         arrow: {
           size: 10,
-          color: isLight ? '#666666' : '#999999',
+          color: isLight ? "#666666" : "#999999",
         },
       },
     };
@@ -85,7 +85,7 @@ export class GitGraphRenderer {
     // Clear existing data
     this.branches.clear();
     this.commitMap.clear();
-    this.container.innerHTML = '';
+    this.container.innerHTML = "";
     this.initialize({});
 
     // Sort commits by date (oldest first for building graph)
@@ -94,9 +94,8 @@ export class GitGraphRenderer {
     );
 
     // Build branch structure
-    const branchCommits = new Map<string, CommitNode[]>();
-    const mainBranch = this.gitgraph.branch('main');
-    this.branches.set('main', mainBranch);
+    const mainBranch = this.gitgraph.branch("main");
+    this.branches.set("main", mainBranch);
 
     // Simplified rendering: just show commits in chronological order
     sortedCommits.forEach((commit) => {
@@ -123,7 +122,7 @@ export class GitGraphRenderer {
         const graphCommit = branch.commit(commitData);
         this.commitMap.set(commit.id, graphCommit);
       } catch (error) {
-        console.error('Error rendering commit:', error);
+        console.error("Error rendering commit:", error);
       }
     });
   }
@@ -157,7 +156,7 @@ export class GitGraphRenderer {
       const graphCommit = branch.commit(commitData);
       this.commitMap.set(commit.id, graphCommit);
     } catch (error) {
-      console.error('Error adding commit:', error);
+      console.error("Error adding commit:", error);
     }
   }
 
@@ -166,7 +165,7 @@ export class GitGraphRenderer {
    */
   private extractBranchName(commit: CommitNode): string {
     if (!commit.refs || commit.refs.length === 0) {
-      return 'main';
+      return "main";
     }
 
     // Find first branch reference
@@ -180,12 +179,12 @@ export class GitGraphRenderer {
       if (originMatch) return originMatch[1];
 
       // Just branch name
-      if (!ref.includes('/') && !ref.includes('tag:')) {
+      if (!ref.includes("/") && !ref.includes("tag:")) {
         return ref;
       }
     }
 
-    return 'main';
+    return "main";
   }
 
   /**
@@ -193,18 +192,18 @@ export class GitGraphRenderer {
    */
   private getCommitColor(commit: CommitNode): string {
     if (commit.parents.length > 1) {
-      return '#ef4444'; // Red for merge commits
+      return "#ef4444"; // Red for merge commits
     }
 
-    if (commit.refs && commit.refs.some((ref) => ref.includes('tag:'))) {
-      return '#FFD93D'; // Bright yellow for tags
+    if (commit.refs && commit.refs.some((ref) => ref.includes("tag:"))) {
+      return "#FFD93D"; // Bright yellow for tags
     }
 
-    if (commit.refs && commit.refs.some((ref) => ref.includes('HEAD'))) {
-      return '#00D9FF'; // Cyan for HEAD
+    if (commit.refs && commit.refs.some((ref) => ref.includes("HEAD"))) {
+      return "#00D9FF"; // Cyan for HEAD
     }
 
-    return '#ef4444'; // Red for regular commits
+    return "#ef4444"; // Red for regular commits
   }
 
   /**
@@ -212,7 +211,7 @@ export class GitGraphRenderer {
    */
   clear(): void {
     if (this.container) {
-      this.container.innerHTML = '';
+      this.container.innerHTML = "";
     }
     this.branches.clear();
     this.commitMap.clear();
@@ -228,4 +227,3 @@ export class GitGraphRenderer {
     this.clear();
   }
 }
-

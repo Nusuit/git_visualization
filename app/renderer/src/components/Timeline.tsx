@@ -18,7 +18,6 @@ interface TimelineProps {
 const Timeline: React.FC<TimelineProps> = ({
   commits,
   repoPath,
-  onDateRangeChange,
   onReplayClick,
   onStopReplay,
   isReplaying = false,
@@ -68,7 +67,7 @@ const Timeline: React.FC<TimelineProps> = ({
     };
   }, [commits]);
 
-  const formatDate = (date: Date | null) => {
+  const formatDate = (date: Date | null): string => {
     if (!date) return "N/A";
     return date.toLocaleDateString("en-US", {
       year: "numeric",
@@ -263,13 +262,13 @@ const Timeline: React.FC<TimelineProps> = ({
                     From:
                   </span>
                   <span className="text-gray-900 dark:text-gray-200">
-                    {formatDate(stats.firstCommit)?.split(",")[0]}
+                    {formatDate(stats.firstCommit).split(",")[0]}
                   </span>
                 </div>
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-gray-500 dark:text-gray-400">To:</span>
                   <span className="text-gray-900 dark:text-gray-200">
-                    {formatDate(stats.lastCommit)?.split(",")[0]}
+                    {formatDate(stats.lastCommit).split(",")[0]}
                   </span>
                 </div>
               </div>

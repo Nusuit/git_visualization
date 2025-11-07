@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import RepoPicker from "./components/RepoPicker";
 import GraphView from "./components/GraphView";
 import Timeline from "./components/Timeline";
