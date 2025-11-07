@@ -1,0 +1,17 @@
+#!/bin/sh
+# Git Flow Visualizer - Post Checkout Hook
+
+REPO_PATH="$(git rev-parse --show-toplevel)"
+REF="$(git rev-parse --abbrev-ref HEAD)"
+HASH="$(git rev-parse HEAD)"
+
+BODY=$(printf '{"repo":"%s","event":"checkout","ref":"%s","hash":"%s"}' "$REPO_PATH" "$REF" "$HASH")
+
+# Send to hook server (don't fail if server is down)
+curl -s -X POST http://127.0.0.1:53210/event \
+  -H "Content-Type: application/json" \
+  -d "$BODY" \
+  >/dev/null 2>&1 || true
+
+exit 0
+

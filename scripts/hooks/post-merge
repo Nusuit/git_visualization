@@ -1,0 +1,20 @@
+#!/bin/sh
+# Git Flow Visualizer - Post Merge Hook
+
+REPO_PATH="$(git rev-parse --show-toplevel)"
+HASH="$(git rev-parse HEAD)"
+MSG="$(git log -1 --pretty=%s)"
+
+# Escape double quotes in message
+MSG_ESCAPED=$(printf "%s" "$MSG" | sed 's/"/\\"/g')
+
+BODY=$(printf '{"repo":"%s","event":"merge","hash":"%s","message":"%s"}' "$REPO_PATH" "$HASH" "$MSG_ESCAPED")
+
+# Send to hook server (don't fail if server is down)
+curl -s -X POST http://127.0.0.1:53210/event \
+  -H "Content-Type: application/json" \
+  -d "$BODY" \
+  >/dev/null 2>&1 || true
+
+exit 0
+

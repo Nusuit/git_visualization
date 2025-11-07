@@ -1,0 +1,21 @@
+#!/bin/sh
+# Git Flow Visualizer - Post Commit Hook
+
+REPO_PATH="$(git rev-parse --show-toplevel)"
+HASH="$(git rev-parse HEAD)"
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+MSG="$(git log -1 --pretty=%s)"
+
+# Escape double quotes in message
+MSG_ESCAPED=$(printf "%s" "$MSG" | sed 's/"/\\"/g')
+
+BODY=$(printf '{"repo":"%s","event":"commit","hash":"%s","branch":"%s","message":"%s"}' "$REPO_PATH" "$HASH" "$BRANCH" "$MSG_ESCAPED")
+
+# Send to hook server (don't fail if server is down)
+curl -s -X POST http://127.0.0.1:53210/event \
+  -H "Content-Type: application/json" \
+  -d "$BODY" \
+  >/dev/null 2>&1 || true
+
+exit 0
+

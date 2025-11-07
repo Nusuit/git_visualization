@@ -1,0 +1,17 @@
+#!/bin/sh
+# Git Flow Visualizer - Pre Push Hook
+
+REPO_PATH="$(git rev-parse --show-toplevel)"
+REMOTE="$1"
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+
+BODY=$(printf '{"repo":"%s","event":"push","remote":"%s","branch":"%s"}' "$REPO_PATH" "$REMOTE" "$BRANCH")
+
+# Send to hook server (don't fail if server is down)
+curl -s -X POST http://127.0.0.1:53210/event \
+  -H "Content-Type: application/json" \
+  -d "$BODY" \
+  >/dev/null 2>&1 || true
+
+exit 0
+

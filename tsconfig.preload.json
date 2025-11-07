@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.main.json",
+  "compilerOptions": {
+    "rootDir": "app",
+    "outDir": "dist"
+  },
+  "include": ["app/preload/**/*"]
+}
+
