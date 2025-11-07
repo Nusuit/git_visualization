@@ -13,6 +13,9 @@ export class GitService {
     const gitPath = findGitExecutable();
     this.git = simpleGit(repoPath, {
       binary: gitPath,
+      unsafe: {
+        allowUnsafeCustomBinary: true, // Required for paths with spaces like "Program Files"
+      },
     });
   }
 
