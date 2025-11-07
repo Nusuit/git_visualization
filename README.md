@@ -14,6 +14,20 @@ A beautiful, real-time desktop application for visualizing Git commit graphs wit
 
 > Just download and run the installer. No Node.js or dependencies required!
 
+### ⚠️ Requirements
+
+**Git must be installed on your system before running this application.**
+
+Download Git from: **https://git-scm.com/downloads**
+
+The application will automatically detect Git in these common locations:
+
+- `C:\Program Files\Git\cmd\git.exe`
+- `C:\Program Files (x86)\Git\cmd\git.exe`
+- System PATH environment variable
+
+If Git is not found, you'll see an error message on startup.
+
 ---
 
 ## ✨ Features

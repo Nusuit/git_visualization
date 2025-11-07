@@ -1,12 +1,13 @@
-import { app, BrowserWindow, dialog, ipcMain } from 'electron';
-import * as path from 'path';
-import { GitService } from './git/gitService';
-import { HookServer } from './git/hookServer';
-import { GitWatcher } from './git/watcher';
-import { SocketServer } from './ipc/socket';
-import { ConfigStore } from './storage/configStore';
-import { HookEventRequest, GitEventPayload } from './types';
-import * as fs from 'fs';
+import { app, BrowserWindow, dialog, ipcMain } from "electron";
+import * as path from "path";
+import { GitService } from "./git/gitService";
+import { HookServer } from "./git/hookServer";
+import { GitWatcher } from "./git/watcher";
+import { SocketServer } from "./ipc/socket";
+import { ConfigStore } from "./storage/configStore";
+import { HookEventRequest, GitEventPayload } from "./types";
+import { findGitExecutable, isGitAvailable } from "./utils/gitHelper";
+import * as fs from "fs";
 
 class GitFlowVisualizerApp {
   private mainWindow: BrowserWindow | null = null;
@@ -36,27 +37,27 @@ class GitFlowVisualizerApp {
       height: 900,
       minWidth: 1000,
       minHeight: 600,
-      backgroundColor: '#1e1e1e',
+      backgroundColor: "#1e1e1e",
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
-        preload: path.join(__dirname, '../preload/index.js'),
+        preload: path.join(__dirname, "../preload/index.js"),
       },
       show: false,
     });
 
     // Show window when ready
-    this.mainWindow.once('ready-to-show', () => {
+    this.mainWindow.once("ready-to-show", () => {
       this.mainWindow?.show();
     });
 
     // Load the app
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       // Try port 5173 first, then 5174 if that fails
-      const port = process.env.VITE_PORT || '5173';
+      const port = process.env.VITE_PORT || "5173";
       let loaded = false;
-      
-      for (const tryPort of [port, '5173', '5174']) {
+
+      for (const tryPort of [port, "5173", "5174"]) {
         try {
           await this.mainWindow.loadURL(`http://localhost:${tryPort}`);
           console.log(`[Main] Loaded from http://localhost:${tryPort}`);
@@ -66,18 +67,20 @@ class GitFlowVisualizerApp {
           console.log(`[Main] Port ${tryPort} not available, trying next...`);
         }
       }
-      
+
       if (!loaded) {
-        console.error('[Main] Could not load from any Vite port!');
+        console.error("[Main] Could not load from any Vite port!");
       }
-      
+
       this.mainWindow.webContents.openDevTools();
     } else {
-      await this.mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+      await this.mainWindow.loadFile(
+        path.join(__dirname, "../renderer/index.html")
+      );
     }
 
     // Handle window close
-    this.mainWindow.on('closed', () => {
+    this.mainWindow.on("closed", () => {
       this.mainWindow = null;
     });
   }
@@ -87,17 +90,20 @@ class GitFlowVisualizerApp {
       await this.socketServer.start();
       await this.hookServer.start();
     } catch (error) {
-      console.error('Failed to start servers:', error);
-      dialog.showErrorBox('Server Error', 'Failed to start internal servers. The app may not function correctly.');
+      console.error("Failed to start servers:", error);
+      dialog.showErrorBox(
+        "Server Error",
+        "Failed to start internal servers. The app may not function correctly."
+      );
     }
   }
 
   private setupIpcHandlers(): void {
     // Handle repo selection
-    ipcMain.handle('select-repo', async () => {
+    ipcMain.handle("select-repo", async () => {
       const result = await dialog.showOpenDialog({
-        properties: ['openDirectory'],
-        title: 'Select Git Repository',
+        properties: ["openDirectory"],
+        title: "Select Git Repository",
       });
 
       if (result.canceled || result.filePaths.length === 0) {
@@ -107,7 +113,10 @@ class GitFlowVisualizerApp {
       const repoPath = result.filePaths[0];
 
       if (!GitService.isGitRepo(repoPath)) {
-        dialog.showErrorBox('Invalid Repository', 'The selected directory is not a valid Git repository.');
+        dialog.showErrorBox(
+          "Invalid Repository",
+          "The selected directory is not a valid Git repository."
+        );
         return null;
       }
 
@@ -115,38 +124,40 @@ class GitFlowVisualizerApp {
     });
 
     // Handle repo loading
-    ipcMain.handle('load-repo', async (_event, repoPath: string) => {
+    ipcMain.handle("load-repo", async (_event, repoPath: string) => {
       try {
         return await this.loadRepository(repoPath);
       } catch (error) {
-        console.error('Failed to load repository:', error);
+        console.error("Failed to load repository:", error);
         return { success: false, error: String(error) };
       }
     });
 
     // Handle hook installation
-    ipcMain.handle('install-hooks', async (_event, repoPath: string) => {
+    ipcMain.handle("install-hooks", async (_event, repoPath: string) => {
       try {
         return await this.installHooks(repoPath);
       } catch (error) {
-        console.error('Failed to install hooks:', error);
+        console.error("Failed to install hooks:", error);
         return { success: false, error: String(error) };
       }
     });
 
     // Get config
-    ipcMain.handle('get-config', () => {
+    ipcMain.handle("get-config", () => {
       return this.configStore.getAll();
     });
 
     // Update config
-    ipcMain.handle('update-config', (_event, key: string, value: any) => {
-      (this.configStore as any)[`set${key.charAt(0).toUpperCase() + key.slice(1)}`]?.(value);
+    ipcMain.handle("update-config", (_event, key: string, value: any) => {
+      (this.configStore as any)[
+        `set${key.charAt(0).toUpperCase() + key.slice(1)}`
+      ]?.(value);
       return { success: true };
     });
 
     // Get recent repos
-    ipcMain.handle('get-recent-repos', () => {
+    ipcMain.handle("get-recent-repos", () => {
       return this.configStore.getRecentRepos();
     });
   }
@@ -156,14 +167,16 @@ class GitFlowVisualizerApp {
       try {
         await this.handleHookEvent(event);
       } catch (error) {
-        console.error('Error handling hook event:', error);
+        console.error("Error handling hook event:", error);
       }
     });
   }
 
-  private async loadRepository(repoPath: string): Promise<{ success: boolean; error?: string }> {
+  private async loadRepository(
+    repoPath: string
+  ): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log('[Main] Loading repository:', repoPath);
+      console.log("[Main] Loading repository:", repoPath);
 
       // Stop existing watcher if any
       if (this.gitWatcher) {
@@ -191,18 +204,19 @@ class GitFlowVisualizerApp {
           try {
             const commit = await this.gitService.getCommit(watcherEvent.hash);
             const gitEvent: GitEventPayload = {
-              type: watcherEvent.type === 'unknown' ? 'commit' : watcherEvent.type,
+              type:
+                watcherEvent.type === "unknown" ? "commit" : watcherEvent.type,
               commit,
               ref: watcherEvent.ref,
               commitId: watcherEvent.hash,
             };
             this.socketServer.emitGitEvent(gitEvent);
             this.socketServer.emitToast({
-              type: 'info',
+              type: "info",
               message: `Detected ${watcherEvent.type}: ${commit.message}`,
             });
           } catch (error) {
-            console.error('Error processing watcher event:', error);
+            console.error("Error processing watcher event:", error);
           }
         }
       });
@@ -212,34 +226,34 @@ class GitFlowVisualizerApp {
       this.configStore.setLastRepoPath(repoPath);
 
       this.socketServer.emitToast({
-        type: 'success',
+        type: "success",
         message: `Loaded repository: ${path.basename(repoPath)}`,
       });
 
       return { success: true };
     } catch (error) {
-      console.error('[Main] Error loading repository:', error);
+      console.error("[Main] Error loading repository:", error);
       return { success: false, error: String(error) };
     }
   }
 
   private async handleHookEvent(event: HookEventRequest): Promise<void> {
-    console.log('[Main] Handling hook event:', event);
+    console.log("[Main] Handling hook event:", event);
 
     // Verify it's for the current repo
     if (this.currentRepoPath && event.repo !== this.currentRepoPath) {
       // Try to normalize paths for comparison
       const normalizedCurrent = path.normalize(this.currentRepoPath);
       const normalizedEvent = path.normalize(event.repo);
-      
+
       if (normalizedCurrent !== normalizedEvent) {
-        console.log('[Main] Event is for different repo, ignoring');
+        console.log("[Main] Event is for different repo, ignoring");
         return;
       }
     }
 
     if (!this.gitService) {
-      console.warn('[Main] No git service available');
+      console.warn("[Main] No git service available");
       return;
     }
 
@@ -247,8 +261,8 @@ class GitFlowVisualizerApp {
       let gitEvent: GitEventPayload;
 
       switch (event.event) {
-        case 'commit':
-        case 'merge':
+        case "commit":
+        case "merge":
           if (event.hash) {
             const commit = await this.gitService.getCommit(event.hash);
             gitEvent = {
@@ -257,54 +271,58 @@ class GitFlowVisualizerApp {
             };
             this.socketServer.emitGitEvent(gitEvent);
             this.socketServer.emitToast({
-              type: 'success',
-              message: `${event.event === 'merge' ? 'Merge' : 'Commit'}: ${event.message || commit.message}`,
+              type: "success",
+              message: `${event.event === "merge" ? "Merge" : "Commit"}: ${
+                event.message || commit.message
+              }`,
             });
           }
           break;
 
-        case 'checkout':
+        case "checkout":
           if (event.hash && event.ref) {
             const commit = await this.gitService.getCommit(event.hash);
             gitEvent = {
-              type: 'checkout',
+              type: "checkout",
               commit,
               ref: event.ref,
               commitId: event.hash,
             };
             this.socketServer.emitGitEvent(gitEvent);
             this.socketServer.emitToast({
-              type: 'info',
+              type: "info",
               message: `Checked out: ${event.ref}`,
             });
           }
           break;
 
-        case 'push':
+        case "push":
           gitEvent = {
-            type: 'push',
+            type: "push",
             remote: event.remote,
             branch: event.branch,
           };
           this.socketServer.emitGitEvent(gitEvent);
           this.socketServer.emitToast({
-            type: 'info',
+            type: "info",
             message: `Pushed to ${event.remote}/${event.branch}`,
           });
           break;
       }
     } catch (error) {
-      console.error('[Main] Error processing hook event:', error);
+      console.error("[Main] Error processing hook event:", error);
       this.socketServer.emitToast({
-        type: 'error',
-        message: 'Error processing git event',
+        type: "error",
+        message: "Error processing git event",
       });
     }
   }
 
-  private async installHooks(repoPath: string): Promise<{ success: boolean; error?: string }> {
+  private async installHooks(
+    repoPath: string
+  ): Promise<{ success: boolean; error?: string }> {
     try {
-      const hooksDir = path.join(repoPath, '.git', 'hooks');
+      const hooksDir = path.join(repoPath, ".git", "hooks");
 
       // Ensure hooks directory exists
       if (!fs.existsSync(hooksDir)) {
@@ -312,8 +330,13 @@ class GitFlowVisualizerApp {
       }
 
       // Get hook scripts from resources
-      const hookNames = ['post-commit', 'post-merge', 'post-checkout', 'pre-push'];
-      const sourceDir = path.join(__dirname, '../../scripts/hooks');
+      const hookNames = [
+        "post-commit",
+        "post-merge",
+        "post-checkout",
+        "pre-push",
+      ];
+      const sourceDir = path.join(__dirname, "../../scripts/hooks");
 
       for (const hookName of hookNames) {
         const sourcePath = path.join(sourceDir, hookName);
@@ -321,28 +344,28 @@ class GitFlowVisualizerApp {
 
         if (fs.existsSync(sourcePath)) {
           fs.copyFileSync(sourcePath, targetPath);
-          
+
           // Make executable (Unix-like systems)
-          if (process.platform !== 'win32') {
-            fs.chmodSync(targetPath, '755');
+          if (process.platform !== "win32") {
+            fs.chmodSync(targetPath, "755");
           }
         }
       }
 
       this.socketServer.emitToast({
-        type: 'success',
-        message: 'Git hooks installed successfully',
+        type: "success",
+        message: "Git hooks installed successfully",
       });
 
       return { success: true };
     } catch (error) {
-      console.error('[Main] Error installing hooks:', error);
+      console.error("[Main] Error installing hooks:", error);
       return { success: false, error: String(error) };
     }
   }
 
   async cleanup(): Promise<void> {
-    console.log('[Main] Cleaning up...');
+    console.log("[Main] Cleaning up...");
 
     if (this.gitWatcher) {
       await this.gitWatcher.stop();
@@ -358,22 +381,36 @@ const gitFlowApp = new GitFlowVisualizerApp();
 
 // App lifecycle
 app.whenReady().then(() => {
+  // Check if Git is available before starting the app
+  if (!isGitAvailable()) {
+    dialog.showErrorBox(
+      "Git Not Found",
+      "Git is not installed or not found in your system PATH.\n\n" +
+        "Please install Git from https://git-scm.com/downloads and restart the application.\n\n" +
+        "Common installation paths:\n" +
+        "• C:\\Program Files\\Git\\cmd\\git.exe\n" +
+        "• C:\\Program Files (x86)\\Git\\cmd\\git.exe"
+    );
+    app.quit();
+    return;
+  }
+
+  console.log("[Main] Git found at:", findGitExecutable());
   gitFlowApp.initialize();
 
-  app.on('activate', () => {
+  app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       gitFlowApp.initialize();
     }
   });
 });
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
     app.quit();
   }
 });
 
-app.on('before-quit', async () => {
+app.on("before-quit", async () => {
   await gitFlowApp.cleanup();
 });
-
