@@ -10,7 +10,7 @@ A beautiful, real-time desktop application for visualizing Git commit graphs wit
 
 ### Latest Release
 
-**Windows:** [Download Git Flow Visualizer Setup.exe](https://github.com/Nusuit/git_visualization/releases/latest/download/Git-Flow-Visualizer-Setup-1.0.0.exe)
+**Windows:** [Download Git Flow Visualizer Setup.exe](https://github.com/Nusuit/git_visualization/releases/download/v1.0.0/Git.Flow.Visualizer.Setup.1.0.0.exe)
 
 > Just download and run the installer. No Node.js or dependencies required!
 
