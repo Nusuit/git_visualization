@@ -25,33 +25,45 @@ export class GitGraphRenderer {
       orientation: config.orientation || 'vertical-reverse',
       mode: config.mode || 'compact',
       template: {
-        colors: ['#5865F2', '#22C55E', '#EAB308', '#EF4444', '#8B5CF6', '#06B6D4'],
+        colors: [
+          '#FF6B9D', // Hot pink
+          '#00D9FF', // Cyan
+          '#FFD93D', // Yellow
+          '#6BCF7F', // Green
+          '#C77DFF', // Purple
+          '#FF8C42', // Orange
+          '#4CC9F0', // Light blue
+          '#F72585', // Magenta
+        ],
         branch: {
-          lineWidth: 4,
+          lineWidth: 5,
           spacing: 50,
           label: {
             display: true,
             bgColor: '#2d2d2d',
-            color: '#e0e0e0',
-            borderRadius: 10,
+            color: '#ffffff',
+            borderRadius: 8,
+            font: 'bold 11px "Segoe UI", sans-serif',
           },
         },
         commit: {
           spacing: 60,
           dot: {
-            size: 10,
+            size: 12,
+            strokeWidth: 3,
+            strokeColor: '#ffffff',
           },
           message: {
             display: true,
             displayAuthor: true,
             displayHash: false,
             color: '#e0e0e0',
-            font: 'normal 12px "Segoe UI", sans-serif',
+            font: 'normal 13px "Segoe UI", sans-serif',
           },
         },
         arrow: {
-          size: 8,
-          color: '#4e4e4e',
+          size: 10,
+          color: '#666666',
         },
       },
     };
@@ -176,14 +188,18 @@ export class GitGraphRenderer {
    */
   private getCommitColor(commit: CommitNode): string {
     if (commit.parents.length > 1) {
-      return '#EF4444'; // Red for merge commits
+      return '#F72585'; // Magenta for merge commits
     }
 
     if (commit.refs && commit.refs.some((ref) => ref.includes('tag:'))) {
-      return '#EAB308'; // Yellow for tags
+      return '#FFD93D'; // Bright yellow for tags
     }
 
-    return '#5865F2'; // Blue for regular commits
+    if (commit.refs && commit.refs.some((ref) => ref.includes('HEAD'))) {
+      return '#00D9FF'; // Cyan for HEAD
+    }
+
+    return '#FF6B9D'; // Hot pink for regular commits
   }
 
   /**

@@ -8,21 +8,23 @@ const ThemeToggle: React.FC = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="relative w-14 h-7 bg-dark-300 dark:bg-dark-300 rounded-full p-1 transition-colors hover:bg-dark-400 dark:hover:bg-dark-400 bg-gray-300 hover:bg-gray-400"
+      className={`relative w-14 h-7 rounded-full p-1 transition-colors ${
+        theme === 'dark'
+          ? 'bg-gray-700 hover:bg-gray-600'
+          : 'bg-blue-500 hover:bg-blue-600'
+      }`}
       title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
     >
       <motion.div
-        className="absolute w-5 h-5 bg-white rounded-full shadow-md flex items-center justify-center"
+        className="w-5 h-5 bg-white rounded-full shadow-lg flex items-center justify-center"
         animate={{
-          x: theme === 'dark' ? 0 : 28,
+          x: theme === 'dark' ? 0 : 24,
         }}
         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
       >
-        {theme === 'dark' ? (
-          <span className="text-xs">🌙</span>
-        ) : (
-          <span className="text-xs">☀️</span>
-        )}
+        <span className="text-sm leading-none">
+          {theme === 'dark' ? '🌙' : '☀️'}
+        </span>
       </motion.div>
     </button>
   );

@@ -50,29 +50,29 @@ code {
 
 /* Button styles */
 .btn {
-  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 cursor-pointer;
+  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 cursor-pointer shadow-sm;
 }
 
 .btn-primary {
-  @apply bg-blue-600 text-white hover:bg-blue-700 active:scale-95;
+  @apply bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 active:scale-95 shadow-lg;
 }
 
 .btn-secondary {
-  @apply bg-gray-700 text-gray-200 hover:bg-gray-600 active:scale-95;
+  @apply bg-gray-700 text-gray-200 hover:bg-gray-600 active:scale-95 dark:bg-gray-700 dark:hover:bg-gray-600;
 }
 
 .btn-danger {
-  @apply bg-red-600 text-white hover:bg-red-700 active:scale-95;
+  @apply bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 active:scale-95 shadow-lg;
 }
 
 /* Card styles */
 .card {
-  @apply bg-dark-200 rounded-lg shadow-lg p-6;
+  @apply bg-white dark:bg-dark-200 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-dark-300;
 }
 
 /* Input styles */
 .input {
-  @apply bg-dark-300 border border-dark-400 rounded-lg px-4 py-2 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500;
+  @apply bg-white dark:bg-dark-300 border border-gray-300 dark:border-dark-400 rounded-lg px-4 py-2 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all;
 }
 
 /* Animation utilities */
