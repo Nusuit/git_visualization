@@ -4,6 +4,7 @@ import { CommitNode } from '../types';
 export interface GraphConfig {
   orientation?: 'vertical-reverse' | 'horizontal' | 'horizontal-reverse';
   mode?: 'compact' | 'extended';
+  theme?: 'light' | 'dark';
 }
 
 export class GitGraphRenderer {
@@ -11,15 +12,19 @@ export class GitGraphRenderer {
   private container: HTMLElement;
   private branches: Map<string, any> = new Map();
   private commitMap: Map<string, any> = new Map();
+  private theme: 'light' | 'dark' = 'dark';
 
   constructor(container: HTMLElement, config: GraphConfig = {}) {
     this.container = container;
+    this.theme = config.theme || 'dark';
     this.initialize(config);
   }
 
   private initialize(config: GraphConfig): void {
     // Clear container
     this.container.innerHTML = '';
+
+    const isLight = this.theme === 'light';
 
     const options: GitgraphOptions = {
       orientation: config.orientation || 'vertical-reverse',
@@ -40,8 +45,8 @@ export class GitGraphRenderer {
           spacing: 50,
           label: {
             display: true,
-            bgColor: '#2d2d2d',
-            color: '#ffffff',
+            bgColor: isLight ? '#f0f0f0' : '#2d2d2d',
+            color: isLight ? '#1a1a1a' : '#ffffff',
             borderRadius: 8,
             font: 'bold 11px "Segoe UI", sans-serif',
           },
@@ -51,19 +56,19 @@ export class GitGraphRenderer {
           dot: {
             size: 12,
             strokeWidth: 3,
-            strokeColor: '#ffffff',
+            strokeColor: isLight ? '#333333' : '#ffffff',
           },
           message: {
             display: true,
             displayAuthor: true,
             displayHash: false,
-            color: '#e0e0e0',
+            color: isLight ? '#333333' : '#e0e0e0',
             font: 'normal 13px "Segoe UI", sans-serif',
           },
         },
         arrow: {
           size: 10,
-          color: '#666666',
+          color: isLight ? '#999999' : '#666666',
         },
       },
     };

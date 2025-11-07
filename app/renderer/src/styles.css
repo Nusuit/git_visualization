@@ -111,10 +111,15 @@ code {
 
 /* Graph container */
 .graph-container {
-  @apply relative w-full h-full overflow-hidden bg-dark-100;
+  @apply relative w-full h-full overflow-hidden;
 }
 
 .graph-canvas {
   @apply w-full h-full;
+}
+
+/* Graph SVG background */
+.graph-canvas svg {
+  @apply bg-white dark:bg-dark-100;
 }
 

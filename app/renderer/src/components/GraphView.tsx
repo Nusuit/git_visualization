@@ -4,6 +4,7 @@ import { CommitNode } from '../types';
 import { GitGraphRenderer } from '../lib/gitGraph';
 import CommitDetailModal from './CommitDetailModal';
 import ThemeToggle from './ThemeToggle';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface GraphViewProps {
   commits: CommitNode[];
@@ -18,6 +19,7 @@ const GraphView: React.FC<GraphViewProps> = ({
   onInstallHooks,
   hooksInstalled,
 }) => {
+  const { theme } = useTheme();
   const graphContainerRef = useRef<HTMLDivElement>(null);
   const gitGraphRef = useRef<GitGraphRenderer | null>(null);
   const [zoom, setZoom] = useState(1);
@@ -37,6 +39,7 @@ const GraphView: React.FC<GraphViewProps> = ({
       gitGraphRef.current = new GitGraphRenderer(graphContainerRef.current, {
         orientation: 'vertical-reverse',
         mode: 'compact',
+        theme: theme,
       });
 
       gitGraphRef.current.renderCommits(commits);
@@ -60,7 +63,7 @@ const GraphView: React.FC<GraphViewProps> = ({
     return () => {
       // Don't destroy on every render, only on unmount
     };
-  }, [commits]);
+  }, [commits, theme]);
 
   useEffect(() => {
     // Cleanup on unmount
@@ -229,7 +232,7 @@ const GraphView: React.FC<GraphViewProps> = ({
             >
               <div 
                 ref={graphContainerRef} 
-                className="graph-canvas"
+                className="graph-canvas bg-white dark:bg-[#1a1a1a]"
                 style={{
                   minHeight: '100%',
                   display: 'inline-block',
