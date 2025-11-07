@@ -56,7 +56,7 @@ export class GitGraphRenderer {
           dot: {
             size: 14,
             strokeWidth: 3,
-            strokeColor: isLight ? '#1a1a1a' : '#ffffff',
+            strokeColor: isLight ? '#fbbf24' : '#fbbf24', // Yellow
           },
           message: {
             display: true,
@@ -193,7 +193,7 @@ export class GitGraphRenderer {
    */
   private getCommitColor(commit: CommitNode): string {
     if (commit.parents.length > 1) {
-      return '#F72585'; // Magenta for merge commits
+      return '#ef4444'; // Red for merge commits
     }
 
     if (commit.refs && commit.refs.some((ref) => ref.includes('tag:'))) {
@@ -204,7 +204,7 @@ export class GitGraphRenderer {
       return '#00D9FF'; // Cyan for HEAD
     }
 
-    return '#FF6B9D'; // Hot pink for regular commits
+    return '#ef4444'; // Red for regular commits
   }
 
   /**

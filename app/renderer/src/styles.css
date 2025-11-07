@@ -123,20 +123,37 @@ code {
   background: transparent !important;
 }
 
-/* Highlight animation for filtered commits - blink only */
-@keyframes blink-glow {
+/* Default: all commits have yellow stroke */
+.graph-canvas circle {
+  stroke: #fbbf24 !important;
+  stroke-width: 3 !important;
+}
+
+/* When filtering, non-matching commits lose yellow stroke */
+.filtered-view .graph-canvas circle {
+  stroke: none !important;
+  stroke-width: 0 !important;
+}
+
+/* Matching commits: yellow color + blink yellow (more intense) */
+@keyframes blink-yellow {
   0%, 100% {
-    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 1)) drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+    filter: drop-shadow(0 0 16px rgba(251, 191, 36, 1)) drop-shadow(0 0 32px rgba(251, 191, 36, 1));
+    stroke: #fbbf24 !important;
+    stroke-width: 5 !important;
     opacity: 1;
   }
   50% {
-    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6)) drop-shadow(0 0 8px rgba(255, 215, 0, 0.4));
-    opacity: 0.5;
+    filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.3));
+    stroke: #fde68a !important;
+    stroke-width: 5 !important;
+    opacity: 0.3;
   }
 }
 
 .highlight-commit {
-  animation: blink-glow 1s ease-in-out infinite !important;
+  fill: #fbbf24 !important;
+  animation: blink-yellow 0.8s ease-in-out infinite !important;
   z-index: 100 !important;
 }
 

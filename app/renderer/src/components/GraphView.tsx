@@ -162,6 +162,7 @@ const GraphView: React.FC<GraphViewProps> = ({
 
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
+    e.stopPropagation(); // Prevent scroll from affecting page
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
     setZoom((prev) => Math.max(0.3, Math.min(3, prev + delta)));
   };
@@ -208,20 +209,20 @@ const GraphView: React.FC<GraphViewProps> = ({
         <div className="flex items-center gap-4">
           {/* Zoom Controls */}
           <div className="flex items-center gap-2">
-            <span className="text-gray-400 text-sm font-medium">🔍 Zoom:</span>
+            <span className="text-gray-600 dark:text-gray-400 text-sm font-medium">🔍 Zoom:</span>
             <button
               onClick={handleZoomOut}
-              className="w-8 h-8 bg-dark-300 hover:bg-dark-400 rounded flex items-center justify-center text-white text-lg font-bold transition-colors"
+              className="w-8 h-8 bg-gray-200 dark:bg-dark-300 hover:bg-gray-300 dark:hover:bg-dark-400 rounded flex items-center justify-center text-gray-900 dark:text-white text-lg font-bold transition-colors"
               title="Zoom Out"
             >
               −
             </button>
-            <span className="text-white text-sm min-w-[4rem] text-center font-mono bg-dark-300 px-3 py-1 rounded">
+            <span className="text-gray-900 dark:text-white text-sm min-w-[4rem] text-center font-mono bg-gray-200 dark:bg-dark-300 px-3 py-1 rounded">
               {Math.round(zoom * 100)}%
             </span>
             <button
               onClick={handleZoomIn}
-              className="w-8 h-8 bg-dark-300 hover:bg-dark-400 rounded flex items-center justify-center text-white text-lg font-bold transition-colors"
+              className="w-8 h-8 bg-gray-200 dark:bg-dark-300 hover:bg-gray-300 dark:hover:bg-dark-400 rounded flex items-center justify-center text-gray-900 dark:text-white text-lg font-bold transition-colors"
               title="Zoom In"
             >
               +
@@ -236,20 +237,20 @@ const GraphView: React.FC<GraphViewProps> = ({
           </div>
 
           {/* Instructions */}
-          <div className="border-l border-dark-400 pl-4 flex items-center gap-3 text-xs text-gray-400">
+          <div className="border-l border-gray-300 dark:border-dark-400 pl-4 flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
             <span>🖱️ <strong>Drag</strong> to pan</span>
             <span>🖲️ <strong>Scroll</strong> to zoom</span>
             <span>🖱️ <strong>Click commit</strong> for details</span>
           </div>
         </div>
 
-        <div className="text-gray-400 text-sm">
-          <span className="font-semibold text-white">{commits.length}</span> commit{commits.length !== 1 ? 's' : ''} loaded
+        <div className="text-gray-600 dark:text-gray-400 text-sm">
+          <span className="font-semibold text-gray-900 dark:text-white">{commits.length}</span> commit{commits.length !== 1 ? 's' : ''} loaded
         </div>
       </div>
 
       {/* Graph Canvas */}
-      <div className="flex-1 overflow-auto relative bg-white dark:bg-dark-100">
+      <div className={`flex-1 overflow-hidden relative bg-white dark:bg-dark-100 ${selectedAuthor !== 'all' ? 'filtered-view' : ''}`}>
         {commits.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
